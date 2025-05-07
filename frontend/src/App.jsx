@@ -501,25 +501,47 @@ function App() {
             {/* Added loading class */}
           </div>
           {error && <p className="error-message">{error}</p>}
-          <form onSubmit={handleSubmit} className="input-form">
-            {/* Add attachment button placeholder */}
-            {/* <button type="button" className="attach-button">📎</button> */}
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Send a message..."
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              className="send-button"
-            >
-              {/* Placeholder for send icon, using text for now */}↑
-            </button>{" "}
-            {/* Correctly close the button tag here */}
-          </form>
+      {/* Input Area */}
+      <form
+        className="input-form"
+        onSubmit={handleSubmit}
+        style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem" }}
+      >
+        <textarea
+          className="chat-input"
+          value={input}
+          onChange={e => {
+            setInput(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = e.target.scrollHeight + "px";
+          }}
+          placeholder="Type your message..."
+          rows={1}
+          style={{
+            resize: "none",
+            minHeight: "2.5rem",
+            maxHeight: "200px",
+            overflowY: "auto",
+            flex: 1,
+            fontSize: "1rem",
+            padding: "0.5rem",
+            borderRadius: "4px",
+            border: "1px solid var(--border-color)",
+            backgroundColor: "var(--input-bg)",
+            color: "var(--text-primary)",
+            boxSizing: "border-box"
+          }}
+          disabled={isLoading}
+        />
+        <button
+          type="submit"
+          className="send-button"
+          disabled={isLoading || !input.trim()}
+          title="Send"
+        >
+          {isLoading ? "..." : "➤"}
+        </button>
+      </form>
         </div>
       </main>
 

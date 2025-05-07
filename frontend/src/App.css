@@ -533,62 +533,59 @@ body {
 /* Input Form */
 .input-form {
   display: flex;
-  align-items: center; /* Align items vertically */
-  padding: 1rem 0 1.5rem 0; /* Padding top/bottom, centered */
-  margin-top: auto; /* Push to bottom */
-  background-color: var(--bg-color); /* Match chat area background */
-  border-top: 1px solid var(--border-color);
-  position: relative; /* For positioning button inside */
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.input-form input[type="text"] {
-  flex-grow: 1;
-  padding: 0.9rem 3rem 0.9rem 1.25rem; /* Make space for button */
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+.input-form textarea {
+  flex: 1;
+  resize: none;
+  min-height: 2.5rem;
+  max-height: 200px;
+  overflow-y: auto;
   font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
   background-color: var(--input-bg);
   color: var(--text-primary);
-}
-
-.input-form input[type="text"]::placeholder {
-  color: var(--text-placeholder);
-}
-
-.input-form input[type="text"]:focus {
-  outline: none;
-  border-color: var(--text-secondary);
-  background-color: var(--input-bg);
-  box-shadow: none;
+  box-sizing: border-box;
 }
 
 .send-button {
-  position: absolute;
-  right: 0.5rem; /* Position inside the input area */
-  top: 45%;
-  transform: translateY(-50%);
-  background-color: var(--send-button-bg);
-  color: var(--accent-color);
+  padding: 0.85rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
   border: none;
-  border-radius: 6px;
-  width: 32px;
-  height: 32px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.input-form .send-button {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 1.2rem; /* Adjust arrow size */
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 50%;
   transition: background-color 0.2s ease;
 }
 
-.send-button:hover {
-  background-color: var(--send-button-hover-bg);
+.input-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
-.send-button:disabled {
-  background-color: var(--input-bg); /* Match input bg when disabled */
-  color: var(--text-placeholder);
-  cursor: not-allowed;
+.chat-input {
+  flex: 1;
+  margin-bottom: 0.5rem;
 }
 
 .input-form button {
