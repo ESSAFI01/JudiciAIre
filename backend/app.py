@@ -72,7 +72,6 @@ except Exception as e:
     print(f"❌ MongoDB setup error: {str(e)}")
 
 # Hugging Face configs
-model_name = os.getenv("HUGGINGFACE_MODEL_REPO_ID", "google/flan-t5-small")
 hf_api_key = os.getenv("HUGGINGFACE_API_KEY")
 hf_space_url = os.getenv("HF_SPACE_URL")
 
@@ -201,21 +200,20 @@ def call_huggingface_chat_model(message):
         raise
     
     
-
 @app.route('/api/save-convo', methods=['POST'])
 @require_auth
 def save_conversation():
     try:
         data = request.get_json()
-        user_id = request.user_id  # From the auth middleware
+        user_id = request.user_id
         conversation_id = data.get("conversationId")
         title = data.get("title", "Untitled Conversation")
         messages = data.get("messages", [])
+        print(f"📥 Saving conversation for user {user_id}: {conversation_id}")
 
         if not conversation_id:
             return jsonify({"error": "conversationId is required"}), 400
         
-        # Prepare update document
         update_doc = {
             "user_id": user_id,
             "title": title,
@@ -223,28 +221,33 @@ def save_conversation():
             "updated_at": datetime.utcnow()
         }
 
-        # Check if conversation exists
-        existing = conversations_collection.find_one({"conversation_id": conversation_id, "user_id": user_id})
-        if existing:
-            # Update existing
+        # Use upsert to update or insert
+        result = conversations_collection.update_one(
+            {"conversation_id": conversation_id, "user_id": user_id},
+            {"$set": update_doc},
+            upsert=True
+        )
+
+        if result.matched_count > 0:
+            print(f"✅ Updated conversation {conversation_id}")
+        else:
+            print(f"✅ Created conversation {conversation_id}")
+            # Ensure created_at is set for new conversations
             conversations_collection.update_one(
                 {"conversation_id": conversation_id, "user_id": user_id},
-                {"$set": update_doc}
+                {"$setOnInsert": {"created_at": datetime.utcnow()}},
+                upsert=True
             )
-        else:
-            # Insert new conversation with created_at
-            update_doc["conversation_id"] = conversation_id
-            update_doc["created_at"] = datetime.utcnow()
-            conversations_collection.insert_one(update_doc)
 
         return jsonify({"conversationId": conversation_id}), 200
     except Exception as e:
-        print(f"Error saving conversation: {str(e)}")
+        print(f"❌ Error saving conversation: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
 #calling model from huggingface
 @app.route("/chat", methods=["POST"])
+@require_auth
 def chat():
     """Handle user messages and return model responses."""
     data = request.get_json()
@@ -264,7 +267,7 @@ def chat():
             conversation_id = str(uuid.uuid4())
             new_conversation = {
                 "conversation_id": conversation_id,
-                "title": inputs[:50],  # Truncate for title
+                "title": inputs[:50],
                 "messages": [
                     {"sender": "user", "text": inputs},
                     {"sender": "bot", "text": response_text}
@@ -287,7 +290,8 @@ def chat():
                         }
                     },
                     "$set": {"updated_at": datetime.now(timezone.utc)}
-                }
+                },
+                upsert=True
             )
         
         return jsonify({

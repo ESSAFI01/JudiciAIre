@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ClerkProvider, useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { BrowserRouter, Routes, Route, useNavigate, Link } from "react-router-dom";
@@ -145,93 +144,58 @@ function Root() {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
 
   useEffect(() => {
-  console.log("🔍 Messages in Root useEffect:", messages);
-  const justSignedIn = sessionStorage.getItem("justSignedIn") === "true";
+    console.log("🔍 Messages in Root useEffect:", messages);
+    const justSignedIn = sessionStorage.getItem("justSignedIn") === "true";
 
-  if (isSignedIn && user) {
-    getToken().then((token) => {
-      fetch("http://localhost:5000/api/save-user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          clerkid: user.id,
-          name: user.fullName,
-          email: user.emailAddresses[0].emailAddress
-        })
-      }).catch((err) => {
-        console.error("Failed to retrieve user's data", err);
-      });
-    });
-  }
-
-  if (isSignedIn && user && justSignedIn && !welcomed) {
-    const userName = user.firstName || user.username || "User";
-    toast.success(`👋 Welcome to JudiciAIre, ${userName}!`, {
-      duration: 3000,
-      position: "top-center",
-    });
-
-    setWelcomed(true);
-    sessionStorage.setItem("justSignedIn", "false");
-  }
-
-  // 💡 Wrap conversation saving logic in async function
-  if (isSignedIn && user && messages.length) {
-    (async () => {
-      try {
-        const token = await getToken();
-
-        const response = await fetch("http://localhost:5000/api/save-convo", {
+    if (isSignedIn && user) {
+      getToken().then((token) => {
+        fetch("http://localhost:5000/api/save-user", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
-            conversationId: selectedConversationId || generateUniqueId(),
-            userId: user?.id,
-            title: "My Conversation Title",
-            messages: messages,
-          }),
+            clerkid: user.id,
+            name: user.fullName,
+            email: user.emailAddresses[0].emailAddress
+          })
+        }).catch((err) => {
+          console.error("Failed to retrieve user's data", err);
         });
+      });
+    }
 
-        const data = await response.json();
+    if (isSignedIn && user && justSignedIn && !welcomed) {
+      const userName = user.firstName || user.username || "User";
+      toast.success(`👋 Welcome to JudiciAIre, ${userName}!`, {
+        duration: 3000,
+        position: "top-center",
+      });
 
-        if (response.ok) {
-          console.log("✅ Conversation saved successfully!");
-          setSelectedConversationId(data.conversationId);
-        } else {
-          console.error("❌ Error saving conversation:", data.error);
-        }
-      } catch (error) {
-        console.error("❌ Network or other error:", error);
-      }
-    })();
-  }
-}, [isSignedIn, user, welcomed, messages]);
-
+      setWelcomed(true);
+      sessionStorage.setItem("justSignedIn", "false");
+    }
+  }, [isSignedIn, user, welcomed, messages]);
 
 
-  function generateUniqueId() {
-    return Math.random().toString(36).substring(2, 15);
-  }
 
   return (
     <>
-      {isSignedIn ? <App 
+      {isSignedIn ? (
+        <App
           messages={messages}
           setMessages={setMessages}
           selectedConversationId={selectedConversationId}
-          setSelectedConversationId={setSelectedConversationId} /> : <LandingPage />}
+          setSelectedConversationId={setSelectedConversationId}
+        />
+      ) : (
+        <LandingPage />
+      )}
       <Toaster position="top-center" reverseOrder={true} />
     </>
   );
 }
-
-
 
 
 createRoot(document.getElementById("root")).render(
