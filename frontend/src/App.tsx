@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -17,6 +17,7 @@ interface Conversation {
 
 export default function App() {
   const { getToken, isSignedIn } = useAuth();
+  const { user } = useUser();
   const [input, setInput] = useState("");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -73,6 +74,7 @@ export default function App() {
   // Handle chat submission
   const handleChat = async () => {
     if (!input.trim()) return;
+    console.log("cc")
 
     try {
       const token = await getToken();
@@ -161,6 +163,8 @@ export default function App() {
       console.error("Error renaming conversation:", error);
     }
   };
+
+
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>

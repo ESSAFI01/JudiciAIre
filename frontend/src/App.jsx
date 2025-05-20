@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react"; // Import useEffect
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-// --- Icons (Simple Placeholders) ---
+// --- Icons and other components remain unchanged ---
 const UserIcon = () => <div className="icon user-icon">U</div>;
-// Updated Bot Icon with SVG resembling the provided image
 const BotIcon = () => (
   <div className="icon bot-icon">
     <svg
@@ -15,7 +14,6 @@ const BotIcon = () => (
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27zM12 15.4l-3.76 2.27 1-4.28-3.09-2.66 4.38-.38L12 6.1l1.47 4.25 4.38.38-3.09 2.66 1 4.28L12 15.4z" />
-      {/* Adding smaller stars - adjust positions as needed */}
       <path
         d="M6 7l1.18 2.5L10 10l-2.5.5L6 13l-1.5-2.5L2 10l2.5-.5L6 7z"
         transform="scale(0.5) translate(-2, -4)"
@@ -28,7 +26,6 @@ const BotIcon = () => (
   </div>
 );
 
-// --- Copy Button Component ---
 const CopyButton = ({ textToCopy }) => {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -36,10 +33,9 @@ const CopyButton = ({ textToCopy }) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
-      // Optionally show an error message to the user
     }
   };
 
@@ -50,15 +46,10 @@ const CopyButton = ({ textToCopy }) => {
   );
 };
 
-// --- About Popup Component ---
 const AboutPopup = ({ onClose }) => {
   return (
     <div className="popup-overlay" onClick={onClose}>
-      {" "}
-      {/* Close on overlay click */}
       <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-        {" "}
-        {/* Prevent closing when clicking inside */}
         <h2>About judiciAIre</h2>
         <p>
           judiciAIre is your AI assistant specializing in **Moroccan law**. It
@@ -79,7 +70,6 @@ const AboutPopup = ({ onClose }) => {
   );
 };
 
-// --- Edit Input Component ---
 const EditInput = ({ initialText, onSave, onCancel }) => {
   const [editText, setEditText] = useState(initialText);
 
@@ -104,7 +94,7 @@ const EditInput = ({ initialText, onSave, onCancel }) => {
         value={editText}
         onChange={(e) => setEditText(e.target.value)}
         onKeyDown={handleKeyDown}
-        rows={Math.max(1, Math.min(10, editText.split("\n").length))} // Basic auto-resize
+        rows={Math.max(1, Math.min(10, editText.split("\n").length))}
         autoFocus
       />
       <div className="edit-buttons">
@@ -119,7 +109,6 @@ const EditInput = ({ initialText, onSave, onCancel }) => {
   );
 };
 
-// Updated suggestion prompts for Moroccan Law
 const suggestionPrompts = [
   {
     title: "Explain the process",
@@ -139,66 +128,45 @@ const suggestionPrompts = [
   },
 ];
 
-const BOT_NAME = "judiciAIre"; // Define bot name
+const BOT_NAME = "judiciAIre";
 
-function App() {
-  // --- State Variables ---
+function App({ messages, setMessages, selectedConversationId, setSelectedConversationId }) {
   const [input, setInput] = useState("");
-  // Load messages from localStorage or default to empty array
-  const [messages, setMessages] = useState(() => {
-    try {
-      const savedMessages = localStorage.getItem("chatMessages");
-      return savedMessages ? JSON.parse(savedMessages) : [];
-    } catch (error) {
-      console.error("Failed to parse messages from localStorage", error);
-      return [];
-    }
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-  // Load temp chat state or default to false
   const [isTempChat, setIsTempChat] = useState(() => {
     const savedIsTemp = localStorage.getItem("isTempChat");
-    // Treat null/undefined as not temporary
     return savedIsTemp === "true";
   });
-  const [isAboutPopupVisible, setIsAboutPopupVisible] = useState(false); // State for popup
-  const [editingMessageIndex, setEditingMessageIndex] = useState(null); // Index of message being edited
+  const [isAboutPopupVisible, setIsAboutPopupVisible] = useState(false);
+  const [editingMessageIndex, setEditingMessageIndex] = useState(null);
 
-  // --- Theme State ---
-  // Function to get the effective theme based on state and system preference
   const getEffectiveTheme = (currentTheme) => {
     if (currentTheme === "system") {
-      // Check system preference
-      return window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
     }
-    return currentTheme; // 'light' or 'dark'
+    return currentTheme;
   };
 
-  // Theme state - Load from localStorage or default to 'system'
   const [themeSetting, setThemeSetting] = useState(() => {
     try {
       const savedTheme = localStorage.getItem("chatThemeSetting");
-      return savedTheme || "system"; // Default to system if nothing saved
+      return savedTheme || "system";
     } catch (error) {
       console.error("Failed to load theme setting from localStorage", error);
       return "system";
     }
   });
 
-  // Derived state for the actual theme being applied (light or dark)
   const [effectiveTheme, setEffectiveTheme] = useState(() =>
     getEffectiveTheme(themeSetting)
   );
 
-  const backendUrl = "http://127.0.0.1:5000/chat"; // Your Flask backend URL
+  const backendUrl = "http://127.0.0.1:5000/chat";
 
-  // --- Effects ---
-  // Save messages to localStorage whenever they change (if not temp chat)
   useEffect(() => {
     if (!isTempChat) {
       try {
@@ -209,18 +177,14 @@ function App() {
     }
   }, [messages, isTempChat]);
 
-  // Save temp chat state to localStorage
   useEffect(() => {
     try {
       localStorage.setItem("isTempChat", isTempChat.toString());
-      // If switching TO temp chat, don't clear saved messages immediately
-      // If switching FROM temp chat, the next message save will overwrite
     } catch (error) {
       console.error("Failed to save temp chat state to localStorage", error);
     }
   }, [isTempChat]);
 
-  // Save theme setting to localStorage
   useEffect(() => {
     try {
       localStorage.setItem("chatThemeSetting", themeSetting);
@@ -229,15 +193,13 @@ function App() {
     }
   }, [themeSetting]);
 
-  // Update effective theme when themeSetting changes or system preference changes
   useEffect(() => {
     const updateTheme = () => {
       setEffectiveTheme(getEffectiveTheme(themeSetting));
     };
 
-    updateTheme(); // Initial update
+    updateTheme();
 
-    // Listener for system theme changes
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = () => {
       if (themeSetting === "system") {
@@ -246,25 +208,19 @@ function App() {
     };
 
     mediaQuery.addEventListener("change", handleChange);
-
-    // Cleanup listener on component unmount or when themeSetting changes
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, [themeSetting]); // Rerun when themeSetting changes
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [themeSetting]);
 
   const handleSuggestionClick = (promptText) => {
     setInput(promptText);
-    // Optionally, you could trigger submit immediately:
-    // handleSubmit(new Event('submit'), promptText);
   };
 
   const startNewChat = (temp = false) => {
     setMessages([]);
     setError(null);
     setIsTempChat(temp);
-    setEditingMessageIndex(null); // Cancel edit on new chat
-    // If starting a new non-temp chat, clear localStorage immediately
+    setEditingMessageIndex(null);
+    setSelectedConversationId(null); // Reset conversation ID
     if (!temp) {
       try {
         localStorage.removeItem("chatMessages");
@@ -281,38 +237,38 @@ function App() {
         i === index ? { ...msg, text: newText } : msg
       )
     );
-    setEditingMessageIndex(null); // Exit edit mode
+    setEditingMessageIndex(null);
   };
 
   const handleCancelEdit = () => {
-    setEditingMessageIndex(null); // Exit edit mode
+    setEditingMessageIndex(null);
   };
 
   const handleSubmit = async (e, overrideInput = null) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault()
     const currentInput = overrideInput !== null ? overrideInput : input;
     if (!currentInput.trim()) return;
 
     const userMessage = { sender: "user", text: currentInput };
-    // If it's a temp chat, don't save (logic would go here)
-    // For now, just log it
-    if (isTempChat) {
-      console.log("Sending message in temporary chat mode (not saved).");
-    }
     setMessages((prevMessages) => [...prevMessages, userMessage]);
-    setInput(""); // Clear input after sending
+    setInput("");
     setIsLoading(true);
     setError(null);
-    setEditingMessageIndex(null); // Cancel any ongoing edit when sending new message
+    setEditingMessageIndex(null);
 
     try {
       const response = await axios.post(backendUrl, {
         inputs: userMessage.text,
+        conversation_id: selectedConversationId,
+        is_temp: isTempChat,
       });
       const botText =
         response.data.response || "Sorry, I couldn't process that.";
       const botMessage = { sender: "bot", text: botText };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
+      if (!isTempChat && response.data.conversation_id) {
+        setSelectedConversationId(response.data.conversation_id);
+      }
     } catch (err) {
       console.error("Error fetching bot response:", err);
       let errorMessage = "Failed to get response from the bot.";
@@ -342,33 +298,28 @@ function App() {
     }
   };
 
-  // Function to cycle theme setting: light -> dark -> system -> light
   const cycleTheme = () => {
     setThemeSetting((prevSetting) => {
       if (prevSetting === "light") return "dark";
       if (prevSetting === "dark") return "system";
-      return "light"; // From 'system' or any unexpected value
+      return "light";
     });
   };
 
-  // Function to get the icon for the current theme setting
   const getThemeIcon = () => {
-    if (themeSetting === "light") return "☀️"; // Sun icon
-    if (themeSetting === "dark") return "🌙"; // Moon icon
-    return "💻"; // Desktop computer icon for system
+    if (themeSetting === "light") return "☀️";
+    if (themeSetting === "dark") return "🌙";
+    return "💻";
   };
 
   return (
-    // Apply the *effective* theme class (light or dark)
     <div
       className={`app-layout ${
         isSidebarVisible ? "sidebar-visible" : "sidebar-hidden"
-      } ${effectiveTheme}-theme`} // Use effectiveTheme here
+      } ${effectiveTheme}-theme`}
     >
-      {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          {/* Add a button group for chat types */}
           <div className="chat-type-buttons">
             <button
               className="new-chat-button"
@@ -381,13 +332,11 @@ function App() {
               onClick={() => startNewChat(true)}
               title="Temporary Chat (History not saved)"
             >
-              {/* Placeholder for an icon, using text */}⏳ Temp
+              ⏳ Temp
             </button>
           </div>
-          {/* Add dropdowns later if needed */}
         </div>
         <div className="chat-history">
-          {/* Placeholder for chat history list */}
           <p className="history-placeholder">
             Your conversations will appear here once you start chatting!
           </p>
@@ -396,10 +345,7 @@ function App() {
           )}
         </div>
         <div className="sidebar-footer">
-          {/* Removed Guest text, placeholder for future user info/settings */}
           <div className="user-info">
-            {/* Removed Theme Toggle Button from here */}
-            {/* Add About button */}
             <button
               onClick={() => setIsAboutPopupVisible(true)}
               className="about-button"
@@ -409,19 +355,14 @@ function App() {
           </div>
         </div>
       </aside>
-
-      {/* Main Chat Area */}
       <main className="chat-area">
-        {/* Add a toggle button for the sidebar */}
         <button
           className="sidebar-toggle-button"
           onClick={() => setIsSidebarVisible(!isSidebarVisible)}
           title={isSidebarVisible ? "Hide Sidebar" : "Show Sidebar"}
         >
-          {isSidebarVisible ? "‹" : "›"} {/* Simple arrows for toggle */}
+          {isSidebarVisible ? "‹" : "›"}
         </button>
-
-        {/* Theme Toggle Button - Top Right */}
         <button
           onClick={cycleTheme}
           className="theme-toggle-button-top-right"
@@ -429,7 +370,6 @@ function App() {
         >
           {getThemeIcon()}
         </button>
-
         <div className="chat-container">
           <div className="chat-box">
             {messages.length === 0 && !isLoading && (
@@ -458,7 +398,6 @@ function App() {
                 </div>
               </div>
             )}
-            {/* Updated Message Rendering */}
             {messages.map((msg, index) => (
               <div key={index} className={`message-wrapper ${msg.sender}`}>
                 {msg.sender === "bot" && <BotIcon />}
@@ -497,55 +436,58 @@ function App() {
                   <p></p>
                 </div>
               </div>
-            )}{" "}
-            {/* Added loading class */}
+            )}
           </div>
           {error && <p className="error-message">{error}</p>}
-      {/* Input Area */}
-      <form
-        className="input-form"
-        onSubmit={handleSubmit}
-        style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem" }}
-      >
-        <textarea
-          className="chat-input"
-          value={input}
-          onChange={e => {
-            setInput(e.target.value);
-            e.target.style.height = "auto";
-            e.target.style.height = e.target.scrollHeight + "px";
-          }}
-          placeholder="Type your message..."
-          rows={1}
-          style={{
-            resize: "none",
-            minHeight: "2.5rem",
-            maxHeight: "200px",
-            overflowY: "auto",
-            flex: 1,
-            fontSize: "1rem",
-            padding: "0.5rem",
-            borderRadius: "4px",
-            border: "1px solid var(--border-color)",
-            backgroundColor: "var(--input-bg)",
-            color: "var(--text-primary)",
-            boxSizing: "border-box"
-          }}
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          className="send-button"
-          disabled={isLoading || !input.trim()}
-          title="Send"
-        >
-          {isLoading ? "..." : "➤"}
-        </button>
-      </form>
+          <form
+            className="input-form"
+            onSubmit={handleSubmit}
+            style={{ display: "flex", alignItems: "flex-end", gap: "0.5rem" }}
+          >
+            <textarea
+              className="chat-input"
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
+              onKeyDown={(e)=>{
+                if(e.key === 'Enter' && !e.shiftKey){
+                  e.preventDefault()
+                  handleSubmit()
+                }
+              }}
+              
+              placeholder="Type your message..."
+              rows={1}
+              style={{
+                resize: "none",
+                minHeight: "2.5rem",
+                maxHeight: "200px",
+                overflowY: "auto",
+                flex: 1,
+                fontSize: "1rem",
+                padding: "0.5rem",
+                borderRadius: "4px",
+                border: "1px solid var(--border-color)",
+                backgroundColor: "var(--input-bg)",
+                color: "var(--text-primary)",
+                boxSizing: "border-box",
+              }}
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              className="send-button"
+              disabled={isLoading || !input.trim()}
+              title="Send"
+            >
+              {isLoading ? "..." : "➤"}
+            </button>
+          </form>
         </div>
       </main>
-
-      {/* Render About Popup Conditionally */}
       {isAboutPopupVisible && (
         <AboutPopup onClose={() => setIsAboutPopupVisible(false)} />
       )}

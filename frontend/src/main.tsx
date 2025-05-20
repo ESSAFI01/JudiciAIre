@@ -19,9 +19,6 @@ declare global {
     };
   }
 }
-window.authState = {
-  justSignedIn: false,
-};
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -144,83 +141,110 @@ function Root() {
   const { isSignedIn, getToken } = useAuth();
   const { user } = useUser();
   const [welcomed, setWelcomed] = useState(false);
-    useEffect(() => {
-    if (isSignedIn && sessionStorage.getItem("justSignedIn") === "false") {
-      sessionStorage.setItem("justSignedIn", "true");
-    }
-  }, [isSignedIn]);
+  const [messages, setMessages] = useState([]);
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
 
   useEffect(() => {
-    console.log("🔁 Root useEffect triggered. isSignedIn:", isSignedIn, "user:", user?.id);
+  console.log("🔍 Messages in Root useEffect:", messages);
+  const justSignedIn = sessionStorage.getItem("justSignedIn") === "true";
 
-    const justSignedIn = sessionStorage.getItem("justSignedIn") === "true";
+  if (isSignedIn && user) {
+    getToken().then((token) => {
+      fetch("http://localhost:5000/api/save-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          clerkid: user.id,
+          name: user.fullName,
+          email: user.emailAddresses[0].emailAddress
+        })
+      }).catch((err) => {
+        console.error("Failed to retrieve user's data", err);
+      });
+    });
+  }
 
-    if (isSignedIn && user) {
-      getToken().then((token) => {
-        fetch("http://localhost:5000/api/save-user", {
+  if (isSignedIn && user && justSignedIn && !welcomed) {
+    const userName = user.firstName || user.username || "User";
+    toast.success(`👋 Welcome to JudiciAIre, ${userName}!`, {
+      duration: 3000,
+      position: "top-center",
+    });
+
+    setWelcomed(true);
+    sessionStorage.setItem("justSignedIn", "false");
+  }
+
+  // 💡 Wrap conversation saving logic in async function
+  if (isSignedIn && user && messages.length) {
+    (async () => {
+      try {
+        const token = await getToken();
+
+        const response = await fetch("http://localhost:5000/api/save-convo", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({
-            clerkid: user.id,
-            name: user.fullName,
-            email: user.emailAddresses[0].emailAddress
-          })
-        })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to save user!!!");
-        })
-        .catch((err) => {
-          console.error("Failed to retrieve user's data", err);
-        });
-      });
-    }
-    
-    if (isSignedIn && user && justSignedIn && !welcomed) {
-      console.log("🔐 User just signed in. Showing welcome toast.");
-      getToken()
-        .then((token) => {
-          console.log("✅ Retrieved token:", token);
-        })
-        .catch((error) => {
-          console.error("❌ Failed to fetch token:", error);
+            conversationId: selectedConversationId || generateUniqueId(),
+            userId: user?.id,
+            title: "My Conversation Title",
+            messages: messages,
+          }),
         });
 
-      const userName = user.firstName || user.username || "User";
-      toast.success(`👋 Welcome to JudiciAIre, ${userName}!`, {
-        duration: 3000,
-        position: "top-center",
-      });
+        const data = await response.json();
 
-      setWelcomed(true);
-      sessionStorage.setItem("justSignedIn","false");
-    }
-  }, [isSignedIn, user, welcomed]);
+        if (response.ok) {
+          console.log("✅ Conversation saved successfully!");
+          setSelectedConversationId(data.conversationId);
+        } else {
+          console.error("❌ Error saving conversation:", data.error);
+        }
+      } catch (error) {
+        console.error("❌ Network or other error:", error);
+      }
+    })();
+  }
+}, [isSignedIn, user, welcomed, messages]);
+
+
+
+  function generateUniqueId() {
+    return Math.random().toString(36).substring(2, 15);
+  }
 
   return (
     <>
-      {isSignedIn ? <App /> : <LandingPage />}
+      {isSignedIn ? <App 
+          messages={messages}
+          setMessages={setMessages}
+          selectedConversationId={selectedConversationId}
+          setSelectedConversationId={setSelectedConversationId} /> : <LandingPage />}
       <Toaster position="top-center" reverseOrder={true} />
     </>
   );
 }
 
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Root />} />
-          <Route path="/sign-out" element={<SignOutPage />} />
-          <Route path="/sign-in" element={<CustomSignIn />} />
-          <Route path="/sign-up" element={<CustomSignUp />} />
-          <Route path="*" element={<NotFound />} />
 
-        </Routes>
-      </BrowserRouter>
-    </ClerkProvider>
-  </StrictMode>
+
+createRoot(document.getElementById("root")).render(
+  <ClerkProvider publishableKey={clerkPubKey}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Root />} />
+        <Route path="/sign-out" element={<SignOutPage />} />
+        <Route path="/sign-in" element={<CustomSignIn />} />
+        <Route path="/sign-up" element={<CustomSignUp />} />
+        <Route path="*" element={<NotFound />} />
+
+      </Routes>
+    </BrowserRouter>
+  </ClerkProvider>
 );

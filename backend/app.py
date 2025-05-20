@@ -87,11 +87,12 @@ def require_auth(f):
         try:
             claims = verify_token(token, clerk_jwt_key)
             user_id = claims["sub"]
+            print(user_id)
             request.user_id = user_id
             
             # Check if user exists in DB, if not create one
             try:
-                existing_user = users_collection.find_one({"user_id": user_id})
+                existing_user = users_collection.find_one({"id": user_id})
                 if not existing_user:
                     if not clerk_client:
                         raise Exception("Clerk client not initialized")
@@ -100,10 +101,9 @@ def require_auth(f):
                     try:
                         clerk_user = clerk_client.users.get(user_id)
                         users_collection.insert_one({
-                            "user_id": user_id,
+                            "id": user_id,
                             "email": clerk_user.email_addresses[0].email_address if clerk_user.email_addresses else None,
-                            "first_name": clerk_user.first_name,
-                            "last_name": clerk_user.last_name,
+                            "name": clerk_user.fullName,
                             "created_at": datetime.now(timezone.utc),
                             "last_active": datetime.now(timezone.utc)
                         })
@@ -129,177 +129,8 @@ def require_auth(f):
     decorated.__name__ = f.__name__
     return decorated
 
-# Clerk webhook endpoint for user creation
-@app.route("/webhook/user", methods=["POST"])
-def handle_clerk_webhook():
-    print("📩 Received Clerk webhook event")
-    
-    # Log raw webhook data for debugging
-    try:
-        data = request.get_json()
-        print(f"📨 Webhook data: {json.dumps(data, indent=2)}")
-    except Exception as e:
-        print(f"❌ Failed to parse webhook JSON: {str(e)}")
-        return jsonify({"error": "Invalid JSON"}), 400
-    
-    # Verify webhook signature (recommended for production)
-    webhook_secret = os.getenv("CLERK_WEBHOOK_SECRET")
-    if webhook_secret:
-        # You would implement signature verification here
-        pass
-    
-    # Handle various event types
-    event_type = data.get("type") if data else None
-    print(f"📣 Event type: {event_type}")
-    
-    if not event_type:
-        return jsonify({"error": "Missing event type"}), 400
-        
-    user_data = data.get("data", {})
-    user_id = user_data.get("id")
-    
-    if not user_id:
-        return jsonify({"error": "Missing user ID in webhook data"}), 400
-        
-    print(f"👤 Processing user: {user_id}")
-    
-    # Handle different event types
-    if event_type == "user.created" or event_type == "user.updated":
-        try:
-            # Extract user data - handle potential missing fields gracefully
-            email_addresses = user_data.get("email_addresses", [])
-            email = email_addresses[0].get("email_address") if email_addresses else None
-            
-            # Fall back to empty strings if first/last name not provided
-            first_name = user_data.get("first_name", "")
-            last_name = user_data.get("last_name", "")
-            
-            print(f"📧 Email: {email}, Name: {first_name} {last_name}")
-            
-            # Check if user exists
-            existing_user = users_collection.find_one({"user_id": user_id})
-            now = datetime.now(timezone.utc)
-            
-            if existing_user and event_type == "user.updated":
-                # Update existing user
-                update_data = {
-                    "last_active": now,
-                    "last_updated": now
-                }
-                
-                # Only update fields if they exist in the webhook data
-                if email:
-                    update_data["email"] = email
-                if first_name:
-                    update_data["first_name"] = first_name
-                if last_name:
-                    update_data["last_name"] = last_name
-                
-                users_collection.update_one(
-                    {"user_id": user_id},
-                    {"$set": update_data}
-                )
-                print(f"✅ Updated user {user_id} in database")
-                
-            elif not existing_user:
-                # Create new user
-                users_collection.insert_one({
-                    "user_id": user_id,
-                    "email": email,
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "created_at": now,
-                    "last_active": now
-                })
-                print(f"✅ Created user {user_id} in database via webhook")
-            else:
-                print(f"ℹ️ User {user_id} already exists in database")
-            
-            return jsonify({
-                "success": True, 
-                "message": f"User {user_id} processed via webhook",
-                "event": event_type
-            })
-            
-        except Exception as e:
-            error_msg = f"❌ Webhook user processing failed: {str(e)}"
-            print(error_msg)
-            return jsonify({"error": error_msg}), 500
-    
-    # Return for other event types
-    return jsonify({"success": True, "message": "Event acknowledged", "event": event_type})
-
-# Add this checking endpoint to debug Clerk webhook format
-@app.route("/dev/webhook-test", methods=["POST"])
-def dev_webhook_test():
-    if not os.getenv("FLASK_ENV") == "development" and not os.getenv("DEBUG") == "1":
-        return jsonify({"error": "This endpoint is only available in development mode"}), 403
-        
-    data = request.get_json()
-    print("Received webhook test data:", json.dumps(data, indent=2))
-    
-    return jsonify({
-        "received": True,
-        "data_structure": data,
-        "user_id_found": "id" in data.get("data", {}) if data else False
-    })
-
-# Add an endpoint to check webhook operation
-@app.route("/dev/check-webhook", methods=["GET"])
-def check_webhook_status():
-    if not os.getenv("FLASK_ENV") == "development" and not os.getenv("DEBUG") == "1":
-        return jsonify({"error": "This endpoint is only available in development mode"}), 403
-    
-    # Get webhook endpoint URL based on request host
-    scheme = request.headers.get("X-Forwarded-Proto", "http")
-    host = request.headers.get("Host", "localhost:5000")
-    webhook_url = f"{scheme}://{host}/webhook/user"
-    
-    return jsonify({
-        "webhook_endpoint": webhook_url,
-        "webhook_secret_configured": bool(os.getenv("CLERK_WEBHOOK_SECRET")),
-        "instructions": "Configure this URL in your Clerk dashboard under Webhooks",
-        "supported_events": ["user.created", "user.updated"],
-        "test_instructions": "You can test via /dev/webhook-test endpoint using POST"
-    })
-
-# Test endpoint to manually trigger user creation (for debugging)
-@app.route("/dev/users/create", methods=["POST"])
-def dev_create_user():
-    if not os.getenv("FLASK_ENV") == "development" and not os.getenv("DEBUG") == "1":
-        return jsonify({"error": "This endpoint is only available in development mode"}), 403
-    
-    data = request.get_json()
-    user_id = data.get("user_id")
-    email = data.get("email")
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-    
-    if not user_id or not email:
-        return jsonify({"error": "user_id and email are required"}), 400
-    
-    try:
-        existing_user = users_collection.find_one({"user_id": user_id})
-        if existing_user:
-            return jsonify({"error": "User already exists"}), 409
-        
-        users_collection.insert_one({
-            "user_id": user_id,
-            "email": email,
-            "first_name": first_name,
-            "last_name": last_name,
-            "created_at": datetime.now(timezone.utc),
-            "last_active": datetime.now(timezone.utc)
-        })
-        return jsonify({"success": True, "message": f"User {user_id} created"})
-    except Exception as e:
-        print(f"❌ Dev user creation failed: {str(e)}")
-        return jsonify({"error": "Failed to create user", "details": str(e)}), 500
-    
-    
-
-
 @app.route('/api/save-user', methods=["POST"])
+@require_auth
 def save_user():
     try:
         user_data = request.get_json()
@@ -368,6 +199,50 @@ def call_huggingface_chat_model(message):
         if hasattr(e, 'response') and e.response:
             print(f"Response content: {e.response.text}")
         raise
+    
+    
+
+@app.route('/api/save-convo', methods=['POST'])
+@require_auth
+def save_conversation():
+    try:
+        data = request.get_json()
+        user_id = request.user_id  # From the auth middleware
+        conversation_id = data.get("conversationId")
+        title = data.get("title", "Untitled Conversation")
+        messages = data.get("messages", [])
+
+        if not conversation_id:
+            return jsonify({"error": "conversationId is required"}), 400
+        
+        # Prepare update document
+        update_doc = {
+            "user_id": user_id,
+            "title": title,
+            "messages": messages,
+            "updated_at": datetime.utcnow()
+        }
+
+        # Check if conversation exists
+        existing = conversations_collection.find_one({"conversation_id": conversation_id, "user_id": user_id})
+        if existing:
+            # Update existing
+            conversations_collection.update_one(
+                {"conversation_id": conversation_id, "user_id": user_id},
+                {"$set": update_doc}
+            )
+        else:
+            # Insert new conversation with created_at
+            update_doc["conversation_id"] = conversation_id
+            update_doc["created_at"] = datetime.utcnow()
+            conversations_collection.insert_one(update_doc)
+
+        return jsonify({"conversationId": conversation_id}), 200
+    except Exception as e:
+        print(f"Error saving conversation: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 #calling model from huggingface
 @app.route("/chat", methods=["POST"])
 def chat():
