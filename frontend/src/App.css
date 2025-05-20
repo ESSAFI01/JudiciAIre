@@ -1,0 +1,1050 @@
+/* Theme Variables */
+:root {
+  /* Dark Mode (Default) */
+  --bg-color: #000000;
+  --sidebar-bg: #171717;
+  --input-bg: #1f1f1f;
+  --card-bg: #1f1f1f;
+  --card-hover-bg: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-placeholder: #757575;
+  --border-color: #303030;
+  --accent-color: #ffffff;
+  --button-bg: #303030;
+  --button-hover-bg: #404040;
+  --send-button-bg: #404040;
+  --send-button-hover-bg: #505050;
+  --user-message-bg: #303030;
+  --bot-message-bg: #1f1f1f;
+  --icon-user-bg: #755fdd;
+  --icon-bot-bg: #657a71;
+  --icon-text: #ffffff;
+  --popup-bg: var(--sidebar-bg);
+  --save-button-bg: #19c37d;
+  --save-button-text: var(--bg-color);
+  --save-button-hover-bg: #15a36a;
+  --cancel-button-border: var(--text-secondary);
+  --cancel-button-text: var(--text-secondary);
+  --cancel-button-hover-bg: var(--button-hover-bg);
+  --cancel-button-hover-text: var(--text-primary);
+  --cancel-button-hover-border: var(--text-primary);
+  --error-bg: #4d1f1f;
+  --error-text: #ffcccc;
+  --error-border: #a83a3a;
+  --scrollbar-thumb: #444;
+  --scrollbar-thumb-hover: #666;
+}
+
+.light-theme {
+  /* Light Mode Overrides */
+  --bg-color: #ffffff;
+  --sidebar-bg: #f0f0f0;
+  --input-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-hover-bg: #f5f5f5;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-placeholder: #888888;
+  --border-color: #dddddd;
+  --accent-color: #ffffff;
+  --button-bg: #e0e0e0;
+  --button-hover-bg: #d0d0d0;
+  --send-button-bg: #6b6b6b; /* Example blue send button */
+  --send-button-hover-bg: #2b639b;
+  --user-message-bg: #e1f5fe; /* Light blue for user */
+  --bot-message-bg: #f0f0f0; /* Light gray for bot */
+  --icon-user-bg: #0288d1; /* Darker blue */
+  --icon-bot-bg: #4f5a50; /* Darker green */
+  --icon-text: #ffffff;
+  --popup-bg: #ffffff;
+  --save-button-bg: #4caf50; /* Green */
+  --save-button-text: #ffffff;
+  --save-button-hover-bg: #45a049;
+  --cancel-button-border: var(--text-secondary);
+  --cancel-button-text: var(--text-secondary);
+  --cancel-button-hover-bg: #eeeeee;
+  --cancel-button-hover-text: var(--text-primary);
+  --cancel-button-hover-border: var(--text-primary);
+  --error-bg: #ffebee;
+  --error-text: #c62828;
+  --error-border: #e57373;
+  --scrollbar-thumb: #cccccc;
+  --scrollbar-thumb-hover: #aaaaaa;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  display: flex;
+  height: 100vh;
+  overflow: hidden; /* Prevent body scroll */
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  display: flex; /* Use flex for the root as well */
+  overflow-x: hidden;
+}
+
+/* App Layout */
+.app-layout {
+  display: flex;
+  width: 100%;
+  max-width: 100vw;
+  height: 100%;
+  transition: grid-template-columns 0.3s ease; /* Smooth transition */
+  overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background-color: var(--sidebar-bg);
+  color: var(--text-primary);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box; /* Include padding in width */
+  border-right: 1px solid var(--border-color);
+  transition: margin-left 0.3s ease; /* Smooth transition */
+  margin-left: 0;
+}
+
+.app-layout.sidebar-hidden .sidebar {
+  margin-left: -260px; /* Hide sidebar off-screen */
+}
+
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Group for New/Temp Chat buttons */
+.chat-type-buttons {
+  display: flex;
+  gap: 0.5rem; /* Space between buttons */
+}
+
+.new-chat-button,
+.temp-chat-button {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.6rem 0.8rem; /* Adjust padding */
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: center; /* Center text */
+  transition: background-color 0.2s ease;
+  flex-grow: 1; /* Make buttons share space */
+}
+
+.new-chat-button:hover,
+.temp-chat-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.temp-chat-button {
+  /* Specific styles for temp button if needed */
+  flex-grow: 0; /* Don't let temp button grow as much */
+  padding: 0.6rem; /* Slightly less padding */
+}
+
+.chat-history {
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.history-placeholder {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* Indicator for Temp Chat Mode */
+.temp-chat-indicator {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto; /* Push footer to the bottom */
+}
+
+.user-info {
+  display: flex; /* Use flex for button alignment */
+  /* justify-content: space-between; */ /* No longer needed as only one button */
+  justify-content: center; /* Center the remaining button */
+  align-items: center; /* Align items vertically */
+}
+
+/* About Button Styling */
+.about-button {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.about-button:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--text-primary);
+}
+
+/* Popup Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure popup is on top */
+}
+
+.popup-content {
+  background-color: var(--popup-bg); /* Use sidebar background */
+  color: var(--text-primary);
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.popup-content h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.popup-content p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.popup-close-button {
+  background-color: var(--button-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.popup-close-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.sidebar h2 {
+  font-size: 0.875rem; /* Smaller heading */
+  color: #8e8ea0; /* Muted color */
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #343541; /* Separator */
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto; /* Scroll if history gets long */
+}
+
+.sidebar li {
+  padding: 0.75rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar li:hover {
+  background-color: #343541; /* Hover effect */
+}
+
+/* Chat Area */
+.chat-area {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-color); /* White chat area background */
+  position: relative; /* Needed for positioning the toggle button */
+  transition: width 0.3s ease, margin-left 0.3s ease; /* Smooth transition */
+}
+
+/* Theme Toggle Button - Top Right */
+.theme-toggle-button-top-right {
+  position: absolute;
+  top: 1rem;
+  right: 1rem; /* Position in the top right */
+  z-index: 10;
+  background-color: transparent; /* Slightly visible background */
+
+  color: var(--text-secondary); /* Use secondary text color */
+  border: 0.5px solid var(--button-bg); /* Transparent border initially */
+  border-radius: 6px;
+  width: 32px; /* Adjust size as needed */
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem; /* Adjust icon size */
+  line-height: 1;
+  padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.theme-toggle-button-top-right:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-button {
+  position: absolute;
+  top: 1rem;
+  left: -10px; /* Position slightly overlapping the chat area edge */
+  z-index: 10;
+  background-color: var(--button-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 50%; /* Make it round */
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem; /* Adjust arrow size */
+  line-height: 1;
+  padding: 0;
+  transition: background-color 0.2s ease, left 0.3s ease;
+}
+
+.sidebar-toggle-button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.app-layout.sidebar-hidden .sidebar-toggle-button {
+  left: 10px; /* Move button inside when sidebar is hidden */
+}
+
+/* Chat Container (within Chat Area) */
+.chat-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px; /* Limit chat width */
+  width: 100%;
+  margin: 0 auto; /* Center the container */
+  padding: 0 1rem; /* Padding on the sides */
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent container overflow */
+}
+
+/* Chat Box - Message Area */
+.chat-box {
+  flex-grow: 1; /* Takes available space */
+  overflow-y: auto; /* Enables scrolling for messages */
+  padding: 2rem 0; /* More padding top/bottom */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Increased space between messages */
+}
+
+/* Welcome Area */
+.welcome-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1; /* Take up space to center vertically */
+  text-align: center;
+  margin-bottom: 10vh; /* Push suggestions up a bit */
+}
+
+/* Welcome Message */
+.welcome-message {
+  text-align: center;
+  margin: auto; /* Center vertically and horizontally */
+  color: #343541;
+}
+
+.welcome-message h1 {
+  font-size: 2.5rem; /* Larger */
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.welcome-message h2 {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-bottom: 3rem;
+}
+
+/* Suggestion Prompts */
+.suggestion-prompts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px; /* Limit width of suggestions */
+}
+
+.suggestion-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.suggestion-card:hover {
+  background-color: var(--card-hover-bg);
+}
+
+.suggestion-title {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.suggestion-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Individual Messages */
+.message {
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  /* max-width: 90%; */ /* Max width is now controlled by wrapper/flexbox */
+  word-wrap: break-word;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  border: 1px solid var(--border-color);
+  position: relative; /* Needed for positioning copy button */
+  min-width: 50px; /* Ensure bubble has some minimum width */
+}
+
+.message p {
+  margin: 0;
+  padding-bottom: 1.5rem; /* Add padding at the bottom for the copy button */
+  padding-left: 2.5rem; /* Add space on the left for edit button */
+  overflow-wrap: break-word; /* Ensure long words break and wrap */
+  white-space: normal; /* Ensure text wraps normally */
+}
+
+.message.user {
+  background-color: var(--user-message-bg);
+  color: var(--text-primary);
+  /* align-self: flex-end; */ /* Alignment handled by wrapper */
+  order: 1; /* Ensure message bubble comes before icon for user */
+}
+
+.message.bot {
+  background-color: var(--bot-message-bg);
+  color: var(--text-primary);
+  /* align-self: flex-start; */ /* Alignment handled by wrapper */
+  order: 0; /* Ensure message bubble comes after icon for bot */
+}
+
+.message.bot.loading p::after {
+  content: " Thinking..."; /* Add space */
+  display: inline-block;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.message.error {
+  background-color: var(--error-bg); /* Dark red background */
+  color: var(--error-text); /* Light red text */
+  align-self: flex-start;
+  border: 1px solid var(--error-border);
+  border-radius: 4px; /* Less rounded for errors */
+  max-width: 100%; /* Allow error to span width */
+}
+
+/* Loading Indicator */
+.message.bot p:empty::after {
+  content: "Thinking...";
+  font-style: italic;
+  color: #666;
+}
+
+/* Input Form */
+.input-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.input-form textarea {
+  flex: 1;
+  resize: none;
+  min-height: 2.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.send-button {
+  padding: 0.85rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.input-form .send-button {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.input-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.chat-input {
+  flex: 1;
+  margin-bottom: 0.5rem;
+}
+
+.input-form button {
+  padding: 0.85rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.input-form button:hover {
+  background-color: #357abd;
+}
+
+.input-form button:disabled {
+  background-color: #a0c4e8;
+  cursor: not-allowed;
+}
+
+/* Error Message Styling (Separate from chat bubbles) */
+.error-message {
+  color: var(--error-text);
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-border);
+  padding: 0.75rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Scrollbar Styling (Optional, Webkit browsers) */
+.chat-box::-webkit-scrollbar,
+.sidebar ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-box::-webkit-scrollbar-track,
+.sidebar ul::-webkit-scrollbar-track {
+  background: transparent; /* Make track invisible */
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+.sidebar ul::-webkit-scrollbar-thumb {
+  background: #555; /* Darker scrollbar for sidebar */
+  border-radius: 10px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover,
+.sidebar ul::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Icon Styles */
+.icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--icon-text);
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.user-icon {
+  background-color: var(--icon-user-bg); /* Example user icon color */
+}
+
+.bot-icon {
+  background-color: var(--icon-bot-bg); /* Example bot icon color */
+}
+
+.bot-icon svg {
+  display: block; /* Remove extra space below SVG */
+}
+
+/* Message Wrapper */
+.message-wrapper {
+  display: flex;
+  align-items: flex-start; /* Align icon and bubble to the top */
+  gap: 1rem; /* Space between icon and message bubble */
+  max-width: 100%; /* Allow wrapper to take full width */
+}
+
+/* Adjust alignment for user messages */
+.message-wrapper.user {
+  justify-content: flex-end; /* Push content (bubble + icon) to the right */
+}
+
+/* Copy Button Styling */
+.copy-button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Show copy button on message hover */
+.message.bot:hover .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.copy-button:active {
+  background-color: var(--send-button-bg);
+}
+
+/* Style for 'Copied!' state */
+.copy-button:disabled {
+  /* Using disabled state implicitly when copied */
+  background-color: var(--bot-message-bg);
+  color: #19c37d; /* Example success color */
+  border-color: #19c37d;
+  cursor: default;
+  opacity: 1; /* Keep visible when copied */
+}
+
+/* Edit Button Styling (similar to copy button) */
+.edit-button {
+  position: absolute;
+  bottom: 0.5rem;
+  /* Position on the left, opposite the copy button */
+  left: 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Show edit button on user message hover */
+.message.user:hover .edit-button {
+  opacity: 1;
+}
+
+.edit-button:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+/* Edit Input Area Styles */
+.edit-message-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%; /* Take full width of the message bubble */
+}
+
+.edit-message-controls textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  resize: none; /* Disable manual resize */
+  box-sizing: border-box; /* Include padding/border in width */
+  font-family: inherit; /* Use the same font as the rest of the app */
+  line-height: 1.4;
+}
+
+.edit-message-controls textarea:focus {
+  outline: none;
+  border-color: var(--text-secondary);
+}
+
+.edit-buttons {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 0.5rem;
+}
+
+.edit-buttons button {
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-button {
+  background-color: var(--save-button-bg); /* Green for save */
+  color: var(--save-button-text);
+  border: 1px solid var(--save-button-bg);
+}
+
+.save-button:hover {
+  background-color: var(--save-button-hover-bg);
+}
+
+.cancel-button {
+  background-color: transparent;
+  color: var(--cancel-button-text);
+  border: 1px solid var(--cancel-button-border);
+}
+
+.cancel-button:hover {
+  background-color: var(--cancel-button-hover-bg);
+  color: var(--cancel-button-hover-text);
+  border-color: var(--cancel-button-hover-border);
+}
+
+/* Responsive Design Media Queries */
+/* Mobile devices (portrait) */
+@media only screen and (max-width: 480px) {
+  .app-layout {
+    flex-direction: row; /* Changed from column to row */
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 80%; /* Width of the sidebar when opened */
+    max-width: 300px;
+    z-index: 100;
+    transform: translateX(-100%); /* Hidden by default */
+    transition: transform 0.3s ease;
+  }
+
+  .app-layout:not(.sidebar-hidden) .sidebar {
+    transform: translateX(0); /* Show sidebar when not hidden */
+    border-right: 1px solid var(--border-color);
+    border-bottom: none;
+    margin-left: 0;
+  }
+
+  .app-layout.sidebar-hidden .sidebar {
+    transform: translateX(-100%); /* Ensure sidebar is hidden */
+    margin-top: 0; /* Reset top margin */
+  }
+
+  .sidebar-toggle-button {
+    position: fixed; /* Fixed positioning for viewport-relative movement */
+    top: 1rem; /* Consistent top alignment */
+    z-index: 110; /* Ensure it's above sidebar and overlay */
+    transition: left 0.3s ease, transform 0.3s ease; /* Smooth animation */
+    transform: none; /* Reset any desktop transformations */
+    /* Adjust size for mobile for better touch target and appearance */
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Keep it round */
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .sidebar-toggle-button:hover {
+    background-color: var(--button-hover-bg);
+  }
+
+  /* When sidebar is hidden */
+  .app-layout.sidebar-hidden .sidebar-toggle-button {
+    left: 10px; /* Position near the left edge of the screen */
+    /* transform: rotate(0deg); /* Ensure correct icon orientation if needed */
+  }
+
+  /* When sidebar is visible */
+  .app-layout:not(.sidebar-hidden) .sidebar-toggle-button {
+    /* Position it to the right of the opened sidebar.
+       Calculates based on sidebar width (80vw, max 300px) + 10px offset. */
+    left: calc(min(80vw, 300px) + 10px);
+    /* transform: rotate(180deg); /* Ensure correct icon orientation if needed */
+  }
+
+  .chat-area {
+    width: 100%;
+    height: 100%;
+    margin-left: 0;
+    /* Add padding to the chat area itself to prevent content overlap
+       with fixed/absolute positioned buttons within it or at its top edge.
+       The value should be enough to clear the theme toggle and sidebar toggle buttons.
+       Approx 36px button height + 1rem top margin = ~52px. Let's use 60px.
+    */
+    padding-top: 60px;
+    box-sizing: border-box; /* Ensure padding is included in height calculation */
+  }
+
+  .app-layout.sidebar-hidden .chat-area {
+    height: 100%;
+  }
+
+  /* Add a semi-transparent overlay when sidebar is visible */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 90;
+  }
+
+  .app-layout:not(.sidebar-hidden) .sidebar-overlay {
+    display: block;
+  }
+
+  .chat-container {
+    padding: 0 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .suggestion-prompts {
+    grid-template-columns: 1fr; /* Single column for suggestions */
+    width: 90%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .message-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .message-wrapper.user {
+    align-items: flex-end;
+  }
+
+  .message-wrapper.bot {
+    align-items: flex-start;
+  }
+
+  .message {
+    max-width: 95%;
+    width: 95%;
+    padding: 0.6rem 1rem;
+    box-sizing: border-box;
+  }
+
+  .input-form {
+    padding: 0.75rem 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .input-form input[type="text"] {
+    padding: 0.7rem 2.5rem 0.7rem 0.75rem; /* Smaller padding */
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .send-button {
+    width: 28px; /* existing */
+    height: 28px; /* existing */
+    top: 50%; /* Vertically center */
+    right: 0.75rem; /* Position from the right edge of the input form */
+    /* transform: translateY(-50%); is inherited from the base .send-button rule and is correct for centering */
+  }
+
+  .welcome-message h1 {
+    font-size: 1.8rem;
+  }
+
+  .welcome-message h2 {
+    font-size: 1rem;
+  }
+
+  .popup-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+}
+
+/* Small tablets and large phones (landscape) */
+@media only screen and (min-width: 481px) and (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .app-layout.sidebar-hidden .sidebar {
+    margin-left: -200px;
+  }
+
+  .chat-container {
+    padding: 0 0.75rem;
+  }
+
+  .suggestion-prompts {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 90%;
+  }
+
+  .message {
+    max-width: 80%;
+  }
+
+  .popup-content {
+    width: 80%;
+  }
+}
+
+/* Tablets and small laptops */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+  .message {
+    max-width: 75%;
+  }
+}
+
+/* Make sure input boxes are touch-friendly on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .input-form input[type="text"],
+  .edit-message-controls textarea,
+  button {
+    font-size: 16px; /* iOS will zoom if font size is less than 16px */
+    padding: 0.85rem;
+  }
+
+  .edit-button,
+  .copy-button {
+    opacity: 0.8; /* Always somewhat visible for touch devices */
+  }
+
+  .input-form .send-button {
+    width: 36px;
+    height: 36px;
+  }
+}
