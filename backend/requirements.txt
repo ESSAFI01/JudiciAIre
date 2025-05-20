@@ -1,7 +1,0 @@
-Flask
-Flask-Cors
-requests
-python-dotenv
-pymongo
-dnspython
-clerk-sdk-python
