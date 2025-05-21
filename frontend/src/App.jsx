@@ -344,7 +344,7 @@ function App() {
 
   // Function to cycle theme setting: light -> dark -> system -> light
   const cycleTheme = () => {
-    setThemeSetting((prevSetting) => {
+    setThemeSetting((prevSetting) => {//tse
       if (prevSetting === "light") return "dark";
       if (prevSetting === "dark") return "system";
       return "light"; // From 'system' or any unexpected value
