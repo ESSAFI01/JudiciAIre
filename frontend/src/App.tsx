@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth,useUser } from "@clerk/clerk-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -104,6 +104,45 @@ export default function App() {
       console.error("Error in chat:", error);
     }
   };
+const saveConvo = async () => {
+  if (!input.trim()) return;
+
+  try {
+    const token = await getToken();
+
+    // Assuming you have userId from your auth context or clerk user object
+    const { user } =useUser();
+
+    const response = await fetch('http://localhost:5000/api/save-convo', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        conversationId: selectedConversationId || generateUniqueId(),
+        userId:user?.id,
+        title: "My Conversation Title",
+        messages,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setSelectedConversationId(data.conversationId);
+      console.log("Conversation saved successfully!");
+    } else {
+      console.error("Error saving conversation:", data.error);
+    }
+  } catch (error) {
+    console.error("Network or other error:", error);
+  }
+};
+
+function generateUniqueId() {
+  return Math.random().toString(36).substring(2, 15);
+}
 
   // Handle conversation selection
   const selectConversation = (conversationId: string) => {
@@ -161,6 +200,8 @@ export default function App() {
       console.error("Error renaming conversation:", error);
     }
   };
+
+  
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>

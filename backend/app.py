@@ -368,6 +368,44 @@ def call_huggingface_chat_model(message):
         if hasattr(e, 'response') and e.response:
             print(f"Response content: {e.response.text}")
         raise
+    
+    
+
+@app.route('/save-convo', methods=['POST'])
+def save_convo():
+    data = request.json
+
+    conversation_id = data.get('conversationId')
+    user_id = data.get('userId')
+    title = data.get('title')
+    messages = data.get('messages')
+
+    if not all([conversation_id, user_id, title, messages]):
+        return jsonify({"error": "Missing fields"}), 400
+
+    existing_convo = conversations_collection.find_one({"conversation_id": conversation_id})
+
+    convo_data = {
+        "conversation_id": conversation_id,
+        "user_id": user_id,
+        "title": title,
+        "messages": messages,
+        "updated_at": datetime.utcnow()
+    }
+
+    if existing_convo:
+        # Update existing conversation
+        conversations_collection.update_one(
+            {"conversation_id": conversation_id},
+            {"$set": convo_data}
+        )
+        return jsonify({"success": True, "conversationId": conversation_id}), 200
+    else:
+        # Create new conversation
+        convo_data["created_at"] = datetime.utcnow()
+        conversations_collection.insert_one(convo_data)
+        return jsonify({"success": True, "conversationId": conversation_id}), 201
+
 #calling model from huggingface
 @app.route("/chat", methods=["POST"])
 def chat():

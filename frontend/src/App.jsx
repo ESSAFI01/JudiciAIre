@@ -376,13 +376,6 @@ function App() {
             >
               + New Chat
             </button>
-            <button
-              className="temp-chat-button"
-              onClick={() => startNewChat(true)}
-              title="Temporary Chat (History not saved)"
-            >
-              {/* Placeholder for an icon, using text */}⏳ Temp
-            </button>
           </div>
           {/* Add dropdowns later if needed */}
         </div>
@@ -391,9 +384,6 @@ function App() {
           <p className="history-placeholder">
             Your conversations will appear here once you start chatting!
           </p>
-          {isTempChat && (
-            <p className="temp-chat-indicator">Temporary Chat Mode</p>
-          )}
         </div>
         <div className="sidebar-footer">
           {/* Removed Guest text, placeholder for future user info/settings */}
@@ -475,15 +465,7 @@ function App() {
                       {msg.sender === "bot" && !isLoading && (
                         <CopyButton textToCopy={msg.text} />
                       )}
-                      {msg.sender === "user" && !isLoading && (
-                        <button
-                          onClick={() => setEditingMessageIndex(index)}
-                          className="edit-button"
-                          title="Edit message"
-                        >
-                          Edit
-                        </button>
-                      )}
+                      {msg.sender === "user"}
                     </>
                   )}
                 </div>

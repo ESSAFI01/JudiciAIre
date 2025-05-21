@@ -179,13 +179,13 @@ function Root() {
     }
     
     if (isSignedIn && user && justSignedIn && !welcomed) {
-      console.log("🔐 User just signed in. Showing welcome toast.");
+      console.log("User just signed in. Showing welcome toast.");
       getToken()
         .then((token) => {
-          console.log("✅ Retrieved token:", token);
+          console.log("Retrieved token:", token);
         })
         .catch((error) => {
-          console.error("❌ Failed to fetch token:", error);
+          console.error("Failed to fetch token:", error);
         });
 
       const userName = user.firstName || user.username || "User";
