@@ -5,6 +5,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.1.0",
     "mui": "^0.0.1",
-    "react-hot-toast": "^2.5.2"
+    "react-hot-toast": "^2.5.2",
+    "uuid": "^11.1.0"
   }
 }

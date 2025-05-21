@@ -74,7 +74,6 @@ export default function App() {
   // Handle chat submission
   const handleChat = async () => {
     if (!input.trim()) return;
-    console.log("cc")
 
     try {
       const token = await getToken();

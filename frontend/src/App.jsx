@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
+import { useAuth } from "@clerk/clerk-react";
 
 // --- Icons and other components remain unchanged ---
 const UserIcon = () => <div className="icon user-icon">U</div>;
@@ -132,6 +133,7 @@ const BOT_NAME = "judiciAIre";
 
 function App({ messages, setMessages, selectedConversationId, setSelectedConversationId }) {
   const [input, setInput] = useState("");
+  const { getToken } = useAuth()
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
@@ -220,7 +222,7 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
     setError(null);
     setIsTempChat(temp);
     setEditingMessageIndex(null);
-    setSelectedConversationId(null); // Reset conversation ID
+    setSelectedConversationId(null);
     if (!temp) {
       try {
         localStorage.removeItem("chatMessages");
@@ -257,10 +259,15 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
     setEditingMessageIndex(null);
 
     try {
+      const token = await getToken();
       const response = await axios.post(backendUrl, {
         inputs: userMessage.text,
         conversation_id: selectedConversationId,
         is_temp: isTempChat,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
       });
       const botText =
         response.data.response || "Sorry, I couldn't process that.";
@@ -276,11 +283,10 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
         errorMessage += ` Server responded with ${err.response.status}.`;
         const backendError = err.response.data?.error || err.response.data;
         if (backendError) {
-          errorMessage += ` Details: ${
-            typeof backendError === "string"
+          errorMessage += ` Details: ${typeof backendError === "string"
               ? backendError
               : JSON.stringify(backendError)
-          }`;
+            }`;
         }
       } else if (err.request) {
         errorMessage +=
@@ -314,9 +320,8 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
 
   return (
     <div
-      className={`app-layout ${
-        isSidebarVisible ? "sidebar-visible" : "sidebar-hidden"
-      } ${effectiveTheme}-theme`}
+      className={`app-layout ${isSidebarVisible ? "sidebar-visible" : "sidebar-hidden"
+        } ${effectiveTheme}-theme`}
     >
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -437,13 +442,13 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
                 e.target.style.height = "auto";
                 e.target.style.height = e.target.scrollHeight + "px";
               }}
-              onKeyDown={(e)=>{
-                if(e.key === 'Enter' && !e.shiftKey){
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
                   handleSubmit()
                 }
               }}
-              
+
               placeholder="Type your message..."
               rows={1}
               style={{
