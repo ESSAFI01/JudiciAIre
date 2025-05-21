@@ -327,13 +327,6 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
             >
               + New Chat
             </button>
-            <button
-              className="temp-chat-button"
-              onClick={() => startNewChat(true)}
-              title="Temporary Chat (History not saved)"
-            >
-              ⏳ Temp
-            </button>
           </div>
         </div>
         <div className="chat-history">
@@ -414,15 +407,7 @@ function App({ messages, setMessages, selectedConversationId, setSelectedConvers
                       {msg.sender === "bot" && !isLoading && (
                         <CopyButton textToCopy={msg.text} />
                       )}
-                      {msg.sender === "user" && !isLoading && (
-                        <button
-                          onClick={() => setEditingMessageIndex(index)}
-                          className="edit-button"
-                          title="Edit message"
-                        >
-                          Edit
-                        </button>
-                      )}
+                      {msg.sender === "user"}
                     </>
                   )}
                 </div>
